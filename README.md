@@ -1,5 +1,29 @@
 # Heron Coding Challenge - File Classifier
 
+## Implementation Thoughts
+
+### Highest Priority
+1. Improve the classifier:  Use a locally running, open source LLM to classify based on file contents (text or image based on file type)
+2. Configurability to new industries: Add a config file for categories by industry, which is loaded at runtime
+3. Add more file types: Add basic support for msft filet types (docx, xlsx, pptx)
+4. Testing: Expand test suite, including some LLM evals time permitting
+5. Containerization: Add a dockerfile for the server
+
+### Other Ideas
+- Add a basic GitHub Actions workflow for CI (lint/test/build)
+- Add Kubernetes manifests for production deployment
+- Add structured logging and/or a simple monitoring endpoint
+
+---
+
+## Notes
+
+Depends on ollama for serving LLM requests. For development on Mac use `brew install ollama` to install ollama and `brew services start ollama` to run ollama in the background. The model used is LLaVA, which can be pulled (with ollama running) using `ollama pull llava:7b`.
+
+
+
+
+
 ## Overview
 
 At Heron, we’re using AI to automate document processing workflows in financial services and beyond. Each day, we handle over 100,000 documents that need to be quickly identified and categorised before we can kick off the automations.
