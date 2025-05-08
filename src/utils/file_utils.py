@@ -1,5 +1,7 @@
 import logging
+import io
 import pypdf
+from docx import Document
 from werkzeug.datastructures import FileStorage
 
 
@@ -20,6 +22,17 @@ def extract_text_from_file(file: FileStorage, extension: str) -> str:
             return text
         except Exception as e:
             logging.error(f"Failed to extract text from PDF: {e}")
+            return ""
+    elif extension == "docx":
+        try:
+            doc = Document(io.BytesIO(file.read()))
+            text = "\n".join([para.text for para in doc.paragraphs])
+            # Only consider the first 5000 characters of the document
+            # for speed and to avoid context window issues
+            # Similar to the PDF, relevant context should be at the beginning of the document
+            return text[:5000]
+        except Exception as e:
+            logging.error(f"Failed to extract text from DOCX: {e}")
             return ""
     else:
         return "" 

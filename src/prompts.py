@@ -35,4 +35,8 @@ You are a document classifier.
 <document_text filename="{filename}">
 {text}
 </document_text>
+
+<reminder>
+- Only return the option name. Do not include any other text, quotes, or escape characters.
+</reminder>
 """

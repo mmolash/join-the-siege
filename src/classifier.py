@@ -61,7 +61,7 @@ def classify_file(file: FileStorage, industry: str):
         result = classify_image_with_ollama(file, industry)
         return result
 
-    if extension in ("txt", "pdf"):
+    if extension in ("txt", "pdf", "docx"):
         text = extract_text_from_file(file, extension)
         result = classify_text_with_ollama(file, text, industry)
         return result

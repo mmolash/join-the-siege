@@ -4,8 +4,8 @@
 
 ### Highest Priority
 1. ✅ Improve the classifier:  Use a locally running, open source LLM to classify based on file contents (text or image based on file type)
-2. Configurability to new industries: Add a config file for categories by industry, which is loaded at runtime
-3. Add more file types: Add basic support for msft file types (docx, xlsx, pptx)
+2. ✅ Configurability to new industries: Add a config file for categories by industry, which is loaded at runtime
+3. ✅ Add docx support
 4. Testing: Expand test suite
 5. Containerization: Add a dockerfile for the server
 

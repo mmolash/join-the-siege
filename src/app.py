@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 
-ALLOWED_EXTENSIONS = {'pdf', 'png', 'jpg', 'txt'}
+ALLOWED_EXTENSIONS = {'pdf', 'png', 'jpg', 'txt', 'docx'}
 
 
 def is_allowed_file(filename):
