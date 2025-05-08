@@ -3,3 +3,8 @@ finance:
   - bank_statement
   - invoice
   - unknown
+
+legal:
+  - contract
+  - invoice
+  - unknown

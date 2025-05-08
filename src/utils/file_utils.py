@@ -11,7 +11,10 @@ def extract_text_from_file(file: FileStorage, extension: str) -> str:
             reader = pypdf.PdfReader(file)
 
             text = ""
-            for page in reader.pages:
+            # Only consider the first 2 pages of the PDF
+            # for speed and to avoid context window issues
+            # Relevant context should be at the beginning of the document
+            for page in reader.pages[:2]:
                 text += page.extract_text() or ""
             
             return text
