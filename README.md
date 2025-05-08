@@ -3,13 +3,14 @@
 ## Implementation Thoughts
 
 ### Highest Priority
-1. Improve the classifier:  Use a locally running, open source LLM to classify based on file contents (text or image based on file type)
+1. ✅ Improve the classifier:  Use a locally running, open source LLM to classify based on file contents (text or image based on file type)
 2. Configurability to new industries: Add a config file for categories by industry, which is loaded at runtime
-3. Add more file types: Add basic support for msft filet types (docx, xlsx, pptx)
-4. Testing: Expand test suite, including some LLM evals time permitting
+3. Add more file types: Add basic support for msft file types (docx, xlsx, pptx)
+4. Testing: Expand test suite
 5. Containerization: Add a dockerfile for the server
 
 ### Other Ideas
+- LLM eval suite for testing effectiveness across models and over time
 - Add a basic GitHub Actions workflow for CI (lint/test/build)
 - Add Kubernetes manifests for production deployment
 - Add structured logging and/or a simple monitoring endpoint

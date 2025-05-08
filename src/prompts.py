@@ -6,10 +6,7 @@ You are a document classifier.
 </task>
 
 <options>
-- drivers_license
-- bank_statement
-- invoice
-- unknown
+{options}
 </options>
 
 <rules>
@@ -28,10 +25,7 @@ You are a document classifier.
 </task>
 
 <options>
-- drivers_license
-- bank_statement
-- invoice
-- unknown
+{options}
 </options>
 
 <rules>
