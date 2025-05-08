@@ -20,6 +20,7 @@ OLLAMMA_URL = os.environ.get("OLLAMA_API_URL")
 
 def classify_image_with_ollama(file: FileStorage, industry: str, model: str="llava"):
     options = load_categories_for_industry(industry)
+    options_set = set([opt.lower() for opt in options])
     options_str = format_options(options)
 
     logger.info(f"Sending image ({file.filename}) to {model} for classification in {industry}. Options are {options}")
@@ -34,7 +35,15 @@ def classify_image_with_ollama(file: FileStorage, industry: str, model: str="lla
         "stream": False
     }
 
-    return call_ollama(data, file, model, ollama_url=OLLAMMA_URL)
+    # Retry the classification if the first attempt fails to produce a valid option
+    for attempt in range(2):
+        result = call_ollama(data, file, model, ollama_url=OLLAMMA_URL)
+        if result["type"] == "error" or (result["type"] == "success" and result["value"] in options):
+            return result
+        elif attempt == 0:
+            logger.warning(f"First classification attempt returned unexpected value: {result}. Retrying...")
+
+    return {"type": "error", "value": f"Classification returned unexpected value after retry."}
 
 
 def classify_text_with_ollama(file: FileStorage, text: str, industry: str, model: str="llava"):
@@ -50,7 +59,15 @@ def classify_text_with_ollama(file: FileStorage, text: str, industry: str, model
         "stream": False
     }
 
-    return call_ollama(data, file, model, ollama_url=OLLAMMA_URL)
+    # Retry the classification if the first attempt fails to produce a valid option
+    for attempt in range(2):
+        result = call_ollama(data, file, model, ollama_url=OLLAMMA_URL)
+        if result["type"] == "error" or (result["type"] == "success" and result["value"] in options):
+            return result
+        elif attempt == 0:
+            logger.warning(f"First classification attempt returned unexpected value: {result}. Retrying...")
+
+    return {"type": "error", "value": f"Classification returned unexpected value after retry."}
 
 
 def classify_file(file: FileStorage, industry: str):
