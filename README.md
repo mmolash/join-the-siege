@@ -7,7 +7,8 @@
 2. ✅ Configurability to new industries: Add a config file for categories by industry, which is loaded at runtime
 3. ✅ Add docx support
 4. Testing: Expand test suite
-5. Containerization: Add a dockerfile for the server
+5. Retry: Retry invalid response formats from LLM
+6. Containerization: Add a dockerfile for the server
 
 ### Other Ideas
 - LLM eval suite for testing effectiveness across models and over time
