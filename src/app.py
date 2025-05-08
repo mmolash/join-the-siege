@@ -11,30 +11,38 @@ app = Flask(__name__)
 ALLOWED_EXTENSIONS = {'pdf', 'png', 'jpg', 'txt'}
 
 
-def allowed_file(filename):
+def is_allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
-@app.route('/classify_file', methods=['POST'])
-def classify_file_route():
+def validate_classify_file_request(request):
+    # 1. Check that file was provided and is allowed
     if 'file' not in request.files:
-        return jsonify({"type": "error", "value": "No file part in the request"}), 400
+        return jsonify({"type": "error", "value": "No file part in the request"}), 400, None, None
 
     file = request.files['file']
 
     if file.filename == '':
-        return jsonify({"type": "error", "value": "No selected file"}), 400
+        return jsonify({"type": "error", "value": "No selected file"}), 400, None, None
+    if not is_allowed_file(file.filename):
+        return jsonify({"type": "error", "value": f"File type not allowed"}), 400, None, None
 
-    if not allowed_file(file.filename):
-        return jsonify({"type": "error", "value": f"File type not allowed"}), 400
-
+    # 2. Check that industry was provided and is supported
     industry = request.form.get('industry')
-    if not industry:
-        return jsonify({"type": "error", "value": "No industry provided"}), 400
 
-    supported_industries = get_supported_industries()
-    if industry not in supported_industries:
-        return jsonify({"type": "error", "value": f"Industry '{industry}' is not supported."}), 400
+    if not industry:
+        return jsonify({"type": "error", "value": "No industry provided"}), 400, None, None
+    if industry not in get_supported_industries():
+        return jsonify({"type": "error", "value": f"Industry '{industry}' is not supported."}), 400, None, None
+
+    return None, 200, file, industry
+
+
+@app.route('/classify_file', methods=['POST'])
+def classify_file_route():
+    error_response, status_code, file, industry = validate_classify_file_request(request)
+    if error_response:
+        return error_response, status_code
 
     logger.info(f"Classifying file: {file.filename} for industry: {industry}")
     file_class = classify_file(file, industry=industry)
