@@ -22,7 +22,8 @@ def classify_file_route():
         return jsonify({"error": f"File type not allowed"}), 400
 
     file_class = classify_file(file)
-    return jsonify({"file_class": file_class}), 200
+    status_code = 200 if file_class["type"] == "success" else 400
+    return jsonify(file_class), status_code
 
 
 if __name__ == '__main__':

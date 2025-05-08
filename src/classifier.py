@@ -25,17 +25,17 @@ def call_ollama(data, file: FileStorage, model: str):
 
         result = response.json()
         if "response" in result:
-            return result["response"].strip().lower()
+            return {"type": "success", "value": result["response"].strip().lower()}
 
-        return result.get("message", "unknown").strip().lower()
+        return {"type": "error", "value": result.get("message", "Unknown error.").strip().lower()}
 
     except requests.RequestException as e:
         logger.error(f"HTTP error calling {model} for {file.filename}: {e}")
-        return f"error: http error - {str(e)}"
+        return {"type": "error", "value": f"HTTP Error: {str(e)}"}
 
     except Exception as e:
         logger.error(f"Unexpected error calling {model} for {file.filename}: {e}")
-        return f"error: unexpected error - {str(e)}"
+        return {"type": "error", "value": f"Unexpected Error: {str(e)}"}
 
 
 def classify_image_with_ollama(file: FileStorage, model: str="llava"):
@@ -100,5 +100,5 @@ def classify_file(file: FileStorage):
         result = classify_text_with_ollama(file, text)
         return result
 
-    return "unknown file"
+    return {"type": "error", "value": "Unsupported file type."}
 
