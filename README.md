@@ -1,102 +1,82 @@
-# Heron Coding Challenge - File Classifier
+# File Classifier
 
-## Implementation Thoughts
+## Overview & Approach
+I focused on improving the classifier in a few ways:
+1. Incorporating an LLM to make classifications based on document context instead of file name
+2. Supporting additional file types (.txt and .docx)
+3. Adding an industry-based config to simplify scalability to new industries
 
-### Highest Priority
-1. ✅ Improve the classifier:  Use a locally running, open source LLM to classify based on file contents (text or image based on file type)
-2. ✅ Configurability to new industries: Add a config file for categories by industry, which is loaded at runtime
-3. ✅ Add docx support
-4. ✅ Testing: Expand test suite
-5. Retry: Retry invalid response formats from LLM
+## Implementation Flow
+- The server receives classification request with a file and industry
+- Server pre-processes the file
+    - If the file is an image (jpg, png), it is converted to base64
+    - If the file is a document (pdf, docx, txt), its text is extracted
+- Server dynically generates a prompt based on the industry config (defined in `config/categories.yaml`) which specifies acceptable categories for the specified industry.
+- Server sends a request to another service (ollama) which provides access to a locally running LLM (in this case, LLaVA, which supports multimodal data) with the prompt and processed file.
+- Server checks for a valid response (one of the industry's options) and retries once if not valid
+- Server returns response
 
-### Other Ideas
-- LLM eval suite for testing effectiveness across models and over time
-- Containerize the server for production deployment
-- Add a basic GitHub Actions workflow for CI (lint/test/build)
-- Add Kubernetes manifests for production deployment
-- Add structured logging and/or a simple monitoring endpoint
+## Future Enchancements & Other Ideas Considered
+- Set up an evaluation suite for LLM performance that can test effectiveness across models and over time
+    - Add more test files + expected result for each supported industry 
+- Prepare service for production deployment
+    - Set up a Dockerfile for containerizing the Flask server
+    - Add Kubernetes manifests for production deployment (using official ollama container)
+- Add CI (lint, test, and build) using GitHub Actions
+- Remove dependency on ollama to enable use of frontier (close source) models
+- Add simple UI for hitting classification service and/or monitoring past classifications
 
----
-
-## Notes
-
-Depends on ollama for serving LLM requests. For development on Mac use `brew install ollama` to install ollama and `brew services start ollama` to run ollama in the background. The model used is LLaVA, which can be pulled (with ollama running) using `ollama pull llava:7b`.
-
-
-
-
-
-## Overview
-
-At Heron, we’re using AI to automate document processing workflows in financial services and beyond. Each day, we handle over 100,000 documents that need to be quickly identified and categorised before we can kick off the automations.
-
-This repository provides a basic endpoint for classifying files by their filenames. However, the current classifier has limitations when it comes to handling poorly named files, processing larger volumes, and adapting to new industries effectively.
-
-**Your task**: improve this classifier by adding features and optimisations to handle (1) poorly named files, (2) scaling to new industries, and (3) processing larger volumes of documents.
-
-This is a real-world challenge that allows you to demonstrate your approach to building innovative and scalable AI solutions. We’re excited to see what you come up with! Feel free to take it in any direction you like, but we suggest:
-
-
-### Part 1: Enhancing the Classifier
-
-- What are the limitations in the current classifier that's stopping it from scaling?
-- How might you extend the classifier with additional technologies, capabilities, or features?
-
-
-### Part 2: Productionising the Classifier 
-
-- How can you ensure the classifier is robust and reliable in a production environment?
-- How can you deploy the classifier to make it accessible to other services and users?
-
-We encourage you to be creative! Feel free to use any libraries, tools, services, models or frameworks of your choice
-
-### Possible Ideas / Suggestions
-- Train a classifier to categorize files based on the text content of a file
-- Generate synthetic data to train the classifier on documents from different industries
-- Detect file type and handle other file formats (e.g., Word, Excel)
-- Set up a CI/CD pipeline for automatic testing and deployment
-- Refactor the codebase to make it more maintainable and scalable
-
-## Marking Criteria
-- **Functionality**: Does the classifier work as expected?
-- **Scalability**: Can the classifier scale to new industries and higher volumes?
-- **Maintainability**: Is the codebase well-structured and easy to maintain?
-- **Creativity**: Are there any innovative or creative solutions to the problem?
-- **Testing**: Are there tests to validate the service's functionality?
-- **Deployment**: Is the classifier ready for deployment in a production environment?
-
-
-## Getting Started
-1. Clone the repository:
-    ```shell
-    git clone <repository_url>
-    cd heron_classifier
-    ```
-
-2. Install dependencies:
-    ```shell
-    python -m venv venv
-    source venv/bin/activate
-    pip install -r requirements.txt
-    ```
-
-3. Run the Flask app:
-    ```shell
-    python -m src.app
-    ```
-
-4. Test the classifier using a tool like curl:
-    ```shell
-    curl -X POST -F 'file=@path_to_pdf.pdf' http://127.0.0.1:5000/classify_file
-    ```
-
-5. Run tests:
+## Setup
+1. **Install python dependencies**
    ```shell
-    pytest
-    ```
+   python -m venv venv
+   source venv/bin/activate
+   pip install -r requirements.txt
+   ```
+2. **Install and run ollama** (for Mac):
+   ```shell
+   brew install ollama
+   brew services start ollama
+   ```
+3. **Pull the LLaVA model** (with ollama running):
+   ```shell
+   ollama pull llava:7b
+   ```
+4. **Create .env file** with ollama URL (based on `.env.example`)
 
-## Submission
+## Configuration
+To add or modify industries and their accepted categories, edit `config/categories.yaml`:
 
-Please aim to spend 3 hours on this challenge.
+```yaml
+finance:
+  - drivers_license
+  - bank_statement
+  - invoice
+  - unknown
 
-Once completed, submit your solution by sharing a link to your forked repository. Please also provide a brief write-up of your ideas, approach, and any instructions needed to run your solution. 
+<industry name (as it should be included in classify_file request)>:
+  - <classification option>
+  - ...
+
+...
+```
+
+Note: industries and categories are loaded at runtime (currently on each request), so they can be updated dynamically without restarting the server.
+
+## Testing
+Run tests with
+```shell
+pytest
+```
+
+## Usage
+Run the Flask app:
+```shell
+python -m src.app
+```
+
+Send a POST request to `/classify_file` with a file and industry name:
+```sh
+curl -X POST -F 'file=@path_to_file.pdf' -F 'industry=finance' http://127.0.0.1:5000/classify_file
+```
+Note: the default supported industries are `finance` and `legal`
